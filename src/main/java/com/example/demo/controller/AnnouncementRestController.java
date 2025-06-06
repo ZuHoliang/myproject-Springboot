@@ -21,6 +21,7 @@ import com.example.demo.service.AnnouncementService;
 import com.example.demo.service.AuthService;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/announcements")
@@ -53,7 +54,7 @@ public class AnnouncementRestController {
 
 	// 新增公告(ADMIN限定 權限2)
 	@PostMapping("/admin")
-	public AnnouncementDto createAnnouncement(@RequestBody AnnouncementEditDto dto, 
+	public AnnouncementDto createAnnouncement(@Valid @RequestBody AnnouncementEditDto dto, 
 			HttpSession session) {
 		authService.checkAdminPermission(session); //檢查管理者權限
 		UserCert cert = (UserCert) session.getAttribute("userCert");
@@ -63,7 +64,7 @@ public class AnnouncementRestController {
 
 	// 更新公告(ADMIN限定 權限2)
 	@PutMapping("/admin/{id}")
-	public AnnouncementDto updateAnnouncement(@PathVariable Long id, @RequestBody AnnouncementEditDto dto,
+	public AnnouncementDto updateAnnouncement(@PathVariable Long id,@Valid @RequestBody AnnouncementEditDto dto,
 			HttpSession session) {
 		authService.checkAdminPermission(session); //檢查管理者權限
 		return announcementService.updateAnnouncement(id, dto);

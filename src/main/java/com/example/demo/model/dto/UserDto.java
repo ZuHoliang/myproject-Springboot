@@ -8,7 +8,7 @@ import lombok.ToString;
 public class UserDto {
 	private Integer userId;
 	private String accountId;
-	private String userName;
+	private String username;
 	private Integer role;
 	private Boolean active;
 //	private String email;

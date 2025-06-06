@@ -21,6 +21,7 @@ import com.example.demo.service.AuthService;
 import com.example.demo.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
@@ -51,7 +52,7 @@ public class UserRestController {
 	
 	//更新個人資料(登入後使用)
 	@PutMapping("/users/me")
-	public UserDto updatCurrentUser(@RequestBody PersonalEditDto dto, HttpSession session) {
+	public UserDto updatCurrentUser(@Valid @RequestBody PersonalEditDto dto, HttpSession session) {
 		authService.checkAuthenticated(session);
 		UserCert cert = (UserCert)session.getAttribute("userCert");
 		return userService.updateUser(cert.getUserId(), dto.getUsername(), dto.getPassword());
@@ -73,8 +74,8 @@ public class UserRestController {
 	public UserDto updateRole(@PathVariable String accountId, @RequestBody AccountManageDto dto,
 			HttpSession session) {
 		authService.checkAdminPermission(session);
-		if(dto.getRole() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"權限不可為空");
+		if(dto.getRole() == null ||(dto.getRole() != 1 && dto.getRole()!=2)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"權限錯誤");
 		}
 		return userService.updateRole(accountId, dto.getRole());
 	}
