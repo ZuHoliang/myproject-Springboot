@@ -19,28 +19,28 @@ import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/home")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:8008"}, allowCredentials = "true")
+@CrossOrigin(origins = { "http://localhost:5173", "http://localhost:8008" }, allowCredentials = "true")
 public class HomeRestController {
 
-    @Autowired
-    private AnnouncementService announcementService;
+	@Autowired
+	private AnnouncementService announcementService;
 
-    // 提供首頁顯示的最新公告（左側）
-    @GetMapping("/latest-announcements")
-    public ResponseEntity<ApiResponse<List<AnnouncementDto>>> getLatestAnnouncements() {
-        List<AnnouncementDto> announcements = announcementService.getLatestAnnouncements();
-        return ResponseEntity.ok(ApiResponse.success("最新公告查詢成功", announcements));
-    }
+	// 提供首頁顯示的最新公告（左側）
+	@GetMapping("/latest-announcements")
+	public ResponseEntity<ApiResponse<List<AnnouncementDto>>> getLatestAnnouncements() {
+		List<AnnouncementDto> announcements = announcementService.getLatestAnnouncements();
+		return ResponseEntity.ok(ApiResponse.success("最新公告查詢成功", announcements));
+	}
 
-    // 提供 session 中登入使用者資訊（右側）
-    @GetMapping("/session-user")
-    public ResponseEntity<ApiResponse<Object>> getSessionUserInfo(HttpSession session) {
-        Object cert = session.getAttribute("userCert");
+	// 提供 session 中登入使用者資訊（右側）
+	@GetMapping("/session-user")
+	public ResponseEntity<ApiResponse<Object>> getSessionUserInfo(HttpSession session) {
+		Object cert = session.getAttribute("userCert");
 
-        if (cert instanceof UserCert userCert) {
-            return ResponseEntity.ok(ApiResponse.success("使用者已登入", userCert));
-        } else {
-            return ResponseEntity.ok(ApiResponse.success("尚未登入", null));
-        }
-    }
+		if (cert instanceof UserCert userCert) {
+			return ResponseEntity.ok(ApiResponse.success("使用者已登入", userCert));
+		} else {
+			return ResponseEntity.ok(ApiResponse.success("尚未登入", null));
+		}
+	}
 }

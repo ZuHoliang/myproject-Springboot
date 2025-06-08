@@ -4,8 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
-
-@ServletComponentScan //啟用WebFilter掃描
+@ServletComponentScan // 啟用WebFilter掃描
 @SpringBootApplication
 public class SpringbootMyprojectApplication {
 

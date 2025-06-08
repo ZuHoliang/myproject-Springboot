@@ -30,7 +30,7 @@ public class AnnouncementRestController {
 
 	@Autowired
 	private AnnouncementService announcementService;
-	
+
 	@Autowired
 	private AuthService authService;
 
@@ -51,12 +51,18 @@ public class AnnouncementRestController {
 	public AnnouncementDto getAnnouncementDetail(@PathVariable Long id) {
 		return announcementService.getAnnouncementById(id);
 	}
+	
+	// 搜尋公告
+	@GetMapping("/search")
+	public List<AnnouncementDto> searchAnnouncements(@RequestParam(required = false) String keyword,
+			@RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate) {
+		return announcementService.searchAnnouncements(keyword, startDate, endDate);
+	}
 
 	// 新增公告(ADMIN限定 權限2)
 	@PostMapping("/admin")
-	public AnnouncementDto createAnnouncement(@Valid @RequestBody AnnouncementEditDto dto, 
-			HttpSession session) {
-		authService.checkAdminPermission(session); //檢查管理者權限
+	public AnnouncementDto createAnnouncement(@Valid @RequestBody AnnouncementEditDto dto, HttpSession session) {
+		authService.checkAdminPermission(session); // 檢查管理者權限
 		UserCert cert = (UserCert) session.getAttribute("userCert");
 		Integer authorId = cert.getUserId();
 		return announcementService.createAnnouncement(dto, authorId);
@@ -64,24 +70,22 @@ public class AnnouncementRestController {
 
 	// 更新公告(ADMIN限定 權限2)
 	@PutMapping("/admin/{id}")
-	public AnnouncementDto updateAnnouncement(@PathVariable Long id,@Valid @RequestBody AnnouncementEditDto dto,
+	public AnnouncementDto updateAnnouncement(@PathVariable Long id, @Valid @RequestBody AnnouncementEditDto dto,
 			HttpSession session) {
-		authService.checkAdminPermission(session); //檢查管理者權限
+		authService.checkAdminPermission(session); // 檢查管理者權限
 		return announcementService.updateAnnouncement(id, dto);
 	}
 
 	// 隱藏公告(ADMIN限定 權限2)
 	@PutMapping("/admin/{id}/active")
-	public AnnouncementDto toggleActive(@PathVariable Long id, @RequestParam Boolean active, 
-			HttpSession session) {
+	public AnnouncementDto toggleActive(@PathVariable Long id, @RequestParam Boolean active, HttpSession session) {
 		authService.checkAdminPermission(session);
 		return announcementService.setAnnouncementActive(id, active);
 	}
 
 	// 刪除公告(ADMIN限定 權限2)
 	@DeleteMapping("/admin/{id}")
-	public void deleteAnnouncement(@PathVariable Long id, 
-			HttpSession session) {
+	public void deleteAnnouncement(@PathVariable Long id, HttpSession session) {
 		authService.checkAdminPermission(session);
 		announcementService.deleteAnnouncement(id);
 	}

@@ -53,12 +53,12 @@ public class LoginRestFilter extends HttpFilter {
 		// 檢查是否登入
 		HttpSession session = request.getSession(false);
 		if (session == null || session.getAttribute("userCert") == null) {
-			
+
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			response.setContentType("application/json;charset=UTF-8");
-			
+
 			ApiResponse<?> apiResponse = ApiResponse.error(401, "請先登入");
-			
+
 			ObjectMapper mapper = new ObjectMapper();
 			String json = mapper.writeValueAsString(apiResponse);
 			response.getWriter().write(json);

@@ -16,7 +16,7 @@ public class PersonalEditDto {
 	@NotBlank(message = "請輸入使用者名稱")
 	@Size(min = 3, message = "使用者名稱至少為3個字")
 	private String username;
-	
+
 	@NotBlank(message = "請輸入密碼")
 	@Size(min = 3, message = "密碼至少為3個字")
 	@Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).+$", message = "密碼請包含大小寫與數字")

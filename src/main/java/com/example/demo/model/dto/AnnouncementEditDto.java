@@ -12,15 +12,14 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AnnouncementEditDto {
-	
+
 	@NotBlank(message = "請輸入標題")
 	@Size(min = 3, message = "標題至少為3個字")
 	private String title;
-	
+
 	@NotBlank(message = "請輸入內文")
-	@Size(min = 3, message = "內文至少為3個字")
 	private String content;
-	
+
 	private Boolean announcementActive;
-	//作者暫不更改
+	// 作者暫不更改
 }

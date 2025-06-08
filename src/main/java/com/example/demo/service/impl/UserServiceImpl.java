@@ -23,12 +23,12 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UserMapper userMapper;
-	
-	//找不到使用者
+
+	// 找不到使用者
 	private User findUser(String accountId) {
 		User user = userRepository.getUser(accountId);
-		if(user == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "找不到使用者: "+accountId);
+		if (user == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "找不到使用者: " + accountId);
 		}
 		return user;
 	}
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	// 新增使用者
-	public void addUser(String username, String password, Integer role, Boolean active) {
+	public UserDto addUser(String username, String password, Integer role, Boolean active) {
 		String maxAccountId = userRepository.findMaxAccountId(); // 取得目前最大accountId
 
 		// 第一筆
@@ -70,7 +70,8 @@ public class UserServiceImpl implements UserService {
 		String salt = Hash.getSalt();
 		String passwordHash = Hash.getPasswordHash(password, salt);
 		User user = new User(null, accountId, username, passwordHash, salt, role, active);
-		userRepository.save(user);
+		User saved = userRepository.save(user);
+        return userMapper.toDto(saved);
 	}
 
 	// 更新使用者
@@ -90,8 +91,8 @@ public class UserServiceImpl implements UserService {
 		User saved = userRepository.save(user);
 		return userMapper.toDto(saved);
 	}
-	
-	//修改密碼
+
+	// 修改密碼
 	@Override
 	public UserDto updatePassword(String accountId, String password) {
 		User user = findUser(accountId);
@@ -101,10 +102,10 @@ public class UserServiceImpl implements UserService {
 		user.setPasswordHash(passwordHash);
 		User updated = userRepository.save(user);
 		return userMapper.toDto(updated);
-		
+
 	}
-	
-	//修改權限
+
+	// 修改權限
 	@Override
 	public UserDto updateRole(String accountId, Integer role) {
 		User user = findUser(accountId);
@@ -112,8 +113,8 @@ public class UserServiceImpl implements UserService {
 		User updated = userRepository.save(user);
 		return userMapper.toDto(updated);
 	}
-	
-	//刪除員工(隱藏)
+
+	// 刪除員工(隱藏)
 	@Override
 	public UserDto updateActive(String accountId, Boolean active) {
 		User user = findUser(accountId);

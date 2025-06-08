@@ -10,19 +10,19 @@ import com.example.demo.service.AuthService;
 import jakarta.servlet.http.HttpSession;
 
 @Service
-public class AuthServiceImpl implements AuthService{
-	
+public class AuthServiceImpl implements AuthService {
+
 	@Override
 	public void checkAdminPermission(HttpSession session) {
 		UserCert cert = (UserCert) session.getAttribute("userCert");
-		if(cert == null) {
+		if (cert == null) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "未登入");
 		}
-		if(!cert.isAdmin()) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN,"無權限");
+		if (!cert.isAdmin()) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "無權限");
 		}
 	}
-	
+
 	@Override
 	public void checkAuthenticated(HttpSession session) {
 		UserCert cert = (UserCert) session.getAttribute("userCert");
