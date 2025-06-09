@@ -83,6 +83,9 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 				.orElseThrow(() -> new AnnouncementNoFoundException("找不到要更新的公告:ID=" + id));
 		existing.setTitle(dto.getTitle());
 		existing.setContent(dto.getContent());
+		if (dto.getAnnouncementActive() != null) {
+			existing.setAnnouncementActive(dto.getAnnouncementActive());
+		}
 		Announcement update = announcementRepository.save(existing);
 		return announcementMapper.toDto(update);
 	}
