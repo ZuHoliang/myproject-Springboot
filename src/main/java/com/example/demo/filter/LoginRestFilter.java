@@ -17,6 +17,11 @@ import jakarta.servlet.http.HttpSession;
 public class LoginRestFilter extends HttpFilter {
 
 	private boolean isPublicEndpoint(HttpServletRequest request) {
+		//預設通過
+		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+		
 		String path = request.getRequestURI();
 		// 移除路徑部屬
 		String context = request.getContextPath();

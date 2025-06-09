@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -24,13 +24,13 @@ public interface AnnouncementRepository extends JpaRepository<Announcement, Long
 	List<Announcement> findByAnnouncementActiveTrueOrderByCreatedTimeDesc();
 	
 	//查詢公告
-	@Query("SELECT a FROM Announcement a WHERE a.announcementActive = true"
-			+ "AND(:keyword IS NULL OR a.title LIKE %:keyword)"
-			+ "AND(:startDate IS NULL OR a.createdTime >= :startDate)"
-			+ "AND(:endDate IS NULL OR a.createdTime <= :endDate)"
+	@Query("SELECT a FROM Announcement a WHERE a.announcementActive = true "
+			+ "AND(:keyword IS NULL OR a.title LIKE CONCAT ('%', :keyword, '%')) "
+			+ "AND(:startDate IS NULL OR a.createdTime >= :startDate) " 
+			+ "AND(:endDate IS NULL OR a.createdTime <= :endDate) "
 			+ "ORDER BY a.createdTime DESC")
 	List<Announcement> searchByKeyword(
 			@Param("keyword")String keyword,
-			@Param("startDate") LocalDateTime starDate,
-			@Param("endDate")LocalDateTime enDateTime);
+			@Param("startDate") LocalDateTime startDate,
+			@Param("endDate")LocalDateTime endDateTime);
 }
