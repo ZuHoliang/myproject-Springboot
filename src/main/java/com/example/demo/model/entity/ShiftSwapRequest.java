@@ -18,6 +18,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,7 +29,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-public class ShiftChangeRequest {
+@Table(name = "shift_swap_request")
+public class ShiftSwapRequest {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,7 +58,7 @@ public class ShiftChangeRequest {
 	//原本的班別(可以原先並未排班)
 	@Enumerated(EnumType.STRING)
 	@Column(name = "swap_from_shift", nullable = true)
-	private ShiftType  swapFromShift;
+	private ShiftType swapFromShift;
 	
 	//可備註換班原由
 	@Column(name = "swap_message", nullable = true)
@@ -75,7 +77,6 @@ public class ShiftChangeRequest {
 	
 	//回應時間
 	@UpdateTimestamp
-	private LocalDateTime responseTime;
-	
+	private LocalDateTime responseTime;	
 
 }

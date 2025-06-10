@@ -18,21 +18,46 @@
 收到通知的user可以進行同意或拒絕，同意後換班才會完成
 
 
-這是我重修改了Entity和DTO，請幫我確認功能是否齊全 有無修改建議，並幫我規劃Mapper和Repository
-
+這是我目前的Entity和DTO，以及User和UserRepository請幫我規劃Mapper(使用@Component、@Autowired、ModelMapper 並將兩個Mapper分開)以及Repository
 <!--Entity-->
 /**Schedule**/
+package com.example.demo.model.entity;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.example.demo.model.enums.ShiftType;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Entity
+@Table(name = "schedule")
 public class Schedule {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "schedule_id")
-	private Long schedlueId;
+	private Long scheduleId;
 	
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = true)
@@ -48,16 +73,45 @@ public class Schedule {
 	
 	@UpdateTimestamp
 	private LocalDateTime updateTime;	
+	
 
 }
 
-/**ShiftChangeRequest**/
+
+/**ShiftSwapRequest**/
+package com.example.demo.model.entity;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.example.demo.model.enums.RequestStatus;
+import com.example.demo.model.enums.ShiftType;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Entity
-public class ShiftChangeRequest {
+@Table(name = "shift_swap_id_request")
+public class ShiftSwapRequest {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -85,7 +139,7 @@ public class ShiftChangeRequest {
 	//原本的班別(可以原先並未排班)
 	@Enumerated(EnumType.STRING)
 	@Column(name = "swap_from_shift", nullable = true)
-	private ShiftType  swapFromShift;
+	private ShiftType swapFromShift;
 	
 	//可備註換班原由
 	@Column(name = "swap_message", nullable = true)
@@ -104,19 +158,30 @@ public class ShiftChangeRequest {
 	
 	//回應時間
 	@UpdateTimestamp
-	private LocalDateTime responseTime;
-	
+	private LocalDateTime responseTime;	
 
 }
 
+
 <!--DTO-->
+/**ScheduleDto**/
+package com.example.demo.model.dto;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 public class ScheduleDto {
-	private Long scheduleId;
-	private Long userId;
+	private Integer scheduleId;
+	private Integer userId;
 	private String username;
 	private String shiftType;
 	private LocalDate workDate;
@@ -126,12 +191,22 @@ public class ScheduleDto {
 }
 
 /**ShiftSwapRequestDto**/
+package com.example.demo.model.dto;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 public class ShiftSwapRequestDto {
-	private Long shiftSwapId;
+	private Integer shiftSwapId;
 	
 	private Integer requestUserId;
 	private String requestUsername;
@@ -155,7 +230,7 @@ public class ShiftSwapRequestDto {
 }
 
 
-<!--另外這是我的UserEntity-->
+<!--另外這是我的UserEntity(最為參考)-->
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -191,3 +266,22 @@ public class User {
 //	private String email;
 
 }
+
+<!--UserRepository-->
+package com.example.demo.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import com.example.demo.model.entity.User;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Integer> {
+	@Query(value = "select user_id, account_id, username, password_hash, salt, active, role from users where account_id=:accountId", nativeQuery = true)
+	User getUser(String accountId);
+
+	@Query("SELECT MAX(u.accountId) FROM User u")
+	String findMaxAccountId();
+}
+

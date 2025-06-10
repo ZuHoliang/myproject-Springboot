@@ -13,7 +13,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class ShiftSwapRequestDto {
-	private Long shiftSwapId;
+	private Integer shiftSwapId;
 	
 	private Integer requestUserId;
 	private String requestUsername;

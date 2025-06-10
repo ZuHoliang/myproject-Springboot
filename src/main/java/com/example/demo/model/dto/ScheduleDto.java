@@ -13,8 +13,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class ScheduleDto {
-	private Long scheduleId;
-	private Long userId;
+	private Integer scheduleId;
+	private Integer userId;
 	private String username;
 	private String shiftType;
 	private LocalDate workDate;
