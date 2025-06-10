@@ -9,15 +9,23 @@ import com.example.demo.model.entity.Schedule;
 
 @Comment
 public class ScheduleMapper {
-	
+
 	@Autowired
 	private ModelMapper modelMapper;
+
+	public ScheduleDto toDto(Schedule schedule) {
+		if (schedule == null)
+			return null;
 	
-	public ScheduleDto toDto(schedule, ScheduleDto.class) {;
-	if(schedule.getWorkUser() != null) {
-		dto.setUserId(schedule.getWorkUser().getId());
+
+	ScheduleDto dto = modelMapper.map(schedule, ScheduleDto.class);
+	if(schedule.getWorkUser()!=null)
+	{
+		dto.setUserId(schedule.getWorkUser().getUserId());
 		dto.setUsername(schedule.getWorkUser().getUsername());
-	}
-return dto;
-	}
+	}return dto;
+	
+	
+	
+	
 }

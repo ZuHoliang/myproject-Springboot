@@ -1,0 +1,193 @@
+我正在設計員工管理系統，前端在VsCode上使用React+Vite開發，後端在Eclipse上使用Java Spring boot開發、資料庫使用MySql 
+並打算使用Springboot MVC和CSR架構以及RESTful API設計
+我接下來打算開始設計換班相關的功能，想先從DTO、Entity開始設計(已經有user資料表)
+班表
+每天有早班/晚班，每班最多2人(可以0人)
+每個User可以自己選擇要排的班，可以進行換班
+
+換班
+換班由User之間決定(將發送換班請求通知，可以原先沒有排班)
+若選擇的班別沒人:進行排班
+若選擇的班別有人但沒超過最大人數:可對已排班的user申請換班，也可直接排班
+若選的班別已達最大人數:只可以對已排班的user申請換班(可指定想換班的user)
+
+通知
+如果收到換班請求將會顯示在'個人資訊'頁面，換班申請人也可留言備註換班原由(可為空)
+會顯示換班的申請人、想進行換班的日期、甚麼時候申請的
+也會顯示自己申請換班的請求、向誰申請換班、想換班的班別、申請的日期，也能取消自己的換班申請
+收到通知的user可以進行同意或拒絕，同意後換班才會完成
+
+
+這是我重修改了Entity和DTO，請幫我確認功能是否齊全 有無修改建議，並幫我規劃Mapper和Repository
+
+<!--Entity-->
+/**Schedule**/
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@Entity
+public class Schedule {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "schedule_id")
+	private Long schedlueId;
+	
+	@ManyToOne
+	@JoinColumn(name = "user_id", nullable = true)
+	private User workUser;
+	
+	private LocalDate workDate;
+	
+	@Enumerated(EnumType.STRING)
+	private ShiftType shiftType;
+	
+	@CreationTimestamp
+	private LocalDateTime createTime;
+	
+	@UpdateTimestamp
+	private LocalDateTime updateTime;	
+
+}
+
+/**ShiftChangeRequest**/
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@Entity
+public class ShiftChangeRequest {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "shift_swap_id")
+	private Long shiftSwapId;
+	
+	//換班申請人
+	@ManyToOne
+	@JoinColumn(name = "requester_id")
+	private User requestUser;
+	
+	//換班被申請人
+	@ManyToOne
+	@JoinColumn(name = "target_id", nullable = true)
+	private User targetUser;
+	
+	//要換班的日期
+	private LocalDate swapDate;
+	
+	//要換班的班別
+	@Enumerated(EnumType.STRING)
+	@Column(name = "swap_to_shift", nullable = true)
+	private ShiftType swapToShift;
+	
+	//原本的班別(可以原先並未排班)
+	@Enumerated(EnumType.STRING)
+	@Column(name = "swap_from_shift", nullable = true)
+	private ShiftType  swapFromShift;
+	
+	//可備註換班原由
+	@Column(name = "swap_message", nullable = true)
+	private String swapMessage;
+	//回應訊息
+	@Column(name = "resp_message", nullable = true)
+	private String respMessage;
+	
+	//請求狀態
+	@Enumerated(EnumType.STRING)
+	private RequestStatus reqStatus;
+	
+	//申請時間
+	@CreationTimestamp
+	private LocalDateTime requestTime;
+	
+	//回應時間
+	@UpdateTimestamp
+	private LocalDateTime responseTime;
+	
+
+}
+
+<!--DTO-->
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class ScheduleDto {
+	private Long scheduleId;
+	private Long userId;
+	private String username;
+	private String shiftType;
+	private LocalDate workDate;
+	private LocalDateTime createTime;
+	private LocalDateTime updateTime;
+
+}
+
+/**ShiftSwapRequestDto**/
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class ShiftSwapRequestDto {
+	private Long shiftSwapId;
+	
+	private Integer requestUserId;
+	private String requestUsername;
+	
+	private Integer targetUserId;
+	private String targetUsername;
+	
+	private String swapFromShift;
+	private String swapToShift;
+	
+	private String swapMessage;
+	private String respMessage;
+	
+	private String reqStatus;
+	
+	private LocalDate swapDate;
+	
+	private LocalDateTime requestTime;
+	private LocalDateTime responseTime;
+	
+}
+
+
+<!--另外這是我的UserEntity-->
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity // (建立資料表)
+@Table(name = "users") // 資料表命名
+public class User {
+
+	@Id // 主鍵、員工編號
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "user_id")
+	private Integer userId;
+	
+	//帳號
+	@Column(name = "account_id", unique = true, nullable = false)
+	private String accountId;
+	//使用者姓名
+	@Column(name = "username", unique = false, nullable = false)
+	private String username;
+	//密碼
+	@Column(name = "password_hash", unique = false, nullable = false)
+	private String passwordHash;
+
+	@Column(name = "salt", unique = false, nullable = false)
+	private String salt;
+
+	@Column(name = "role")
+	private Integer role;
+
+	@Column(name = "active")
+	private Boolean active;
+
+//	@Column(name = "email", nullable = true)
+//	private String email;
+
+}
