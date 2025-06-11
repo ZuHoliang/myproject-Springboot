@@ -22,19 +22,19 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 	List<Schedule> findByWorkUser(User user);
 	
 	//用來排班人數是否大於2
-	int countByWorkDateAndShiftType(LocalDate workDate, String shiftType);
+	int countByWorkDateAndShiftType(LocalDate workDate, ShiftType shiftType);
 	
 	//檢查是否重複排班
-	boolean existsByWorkUserAndWorkDateAndShiftType(User user, LocalDate workDate, String shiftType);
+	boolean existsByWorkUserAndWorkDateAndShiftType(User user, LocalDate workDate, ShiftType shiftType);
 
 	// 查詢某位員工在某天是否已排班
-	void deleteByWorkUserAndWorkDateAndShiftType(User user, LocalDate workDate, String shiftType);
+	void deleteByWorkUserAndWorkDateAndShiftType(User user, LocalDate workDate, ShiftType shiftType);
 
 	// 查詢員工當日的班別
 	Schedule findByWorkUserAndWorkDate(User user, LocalDate workDate);
 	
 	// 查詢員工本月排班數量
-	@Query("SELECT COUNT(s) FROM Schedule s WHERE s.workUser = :user AND MONTH(s.workDate) = :mounth AND YEAR(s.workDate) = year")
+	@Query("SELECT COUNT(s) FROM Schedule s WHERE s.workUser = :user AND MONTH(s.workDate) = :mounth AND YEAR(s.workDate) = :year")
 	int contByUserAndMonth(@Param("user") User user, @Param("month") int month, @Param("year") int year);	
 	
 	// 查詢單個員工當月的排班

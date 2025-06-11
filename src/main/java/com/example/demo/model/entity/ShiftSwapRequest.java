@@ -63,6 +63,7 @@ public class ShiftSwapRequest {
 	//可備註換班事由
 	@Column(name = "swap_message", nullable = true)
 	private String swapMessage;
+	
 	//回應訊息
 	@Column(name = "resp_message", nullable = true)
 	private String respMessage;

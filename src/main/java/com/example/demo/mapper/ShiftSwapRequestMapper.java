@@ -50,7 +50,8 @@ public class ShiftSwapRequestMapper {
 		}
 		
 		if(dto.getTargetUserId() != null) {
-			User targeetUser = userRepository.findById(dto.getTargetUserId()).orElse(null);
+			User targetUser = userRepository.findById(dto.getTargetUserId()).orElse(null);
+			entity.setTargetUser(targetUser);
 		}
 		
 		return entity;

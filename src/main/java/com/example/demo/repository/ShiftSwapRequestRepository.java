@@ -28,7 +28,7 @@ public interface ShiftSwapRequestRepository extends JpaRepository<ShiftSwapReque
     List<ShiftSwapRequest> findByTargetUserAndSwapDate(User targetUser, LocalDate swapDate);
     
     //查詢整月的換班請求
-    @Query("SELECT r FROM ShiftSwapRequest r WHERE MONTH(r.swapDate) =: mounth AND YEAR(r.swapDate) = :year")
+    @Query("SELECT r FROM ShiftSwapRequest r WHERE MONTH(r.swapDate) = :mounth AND YEAR(r.swapDate) = :year")
     List<ShiftSwapRequest> findRequestsByMonth(@Param("month") int month, @Param("year") int year);
 
 }

@@ -25,14 +25,14 @@ public class ScheduleServiceImpl implements ScheduleService {
 	//檢查排班是否已滿(最多2人)
 	@Override
 	public boolean isShiftFull(LocalDate date, ShiftType shiftType) {
-		int count = scheduleRepository.countByWorkDateAndShiftType(date, shiftType.name());
+		int count = scheduleRepository.countByWorkDateAndShiftType(date, shiftType);
 		return count >= 2;
 	}
 	
 	//檢查是否重複排班
 	@Override
 	public boolean hasUserAlreadyScheduled(User user, LocalDate date, ShiftType shiftType) {
-		return scheduleRepository.existsByWorkUserAndWorkDateAndShiftType(user, date, shiftType.name());
+		return scheduleRepository.existsByWorkUserAndWorkDateAndShiftType(user, date, shiftType);
 	}
 	
 	//排班
@@ -56,7 +56,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 	//取消排班
 	@Override
 	public void cancelShift(User user, LocalDate date, ShiftType shiftType) {
-		scheduleRepository.deleteByWorkUserAndWorkDateAndShiftType(user, date, shiftType.name());
+		scheduleRepository.deleteByWorkUserAndWorkDateAndShiftType(user, date, shiftType);
 	}
 	
 	//取得整月排班
