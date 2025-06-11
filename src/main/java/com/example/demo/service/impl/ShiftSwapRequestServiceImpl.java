@@ -9,6 +9,10 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.demo.exception.DuplicateScheduleException;
+import com.example.demo.exception.ScheduleFullException;
+import com.example.demo.exception.SwapRequestNotFoundException;
+import com.example.demo.exception.SwapRequestStateException;
 import com.example.demo.model.entity.Schedule;
 import com.example.demo.model.entity.ShiftSwapRequest;
 import com.example.demo.model.entity.User;
@@ -38,21 +42,22 @@ public class ShiftSwapRequestServiceImpl implements ShiftSwapRequestService {
 	public ShiftSwapRequest requestSwap(User requester, User target, LocalDate date, ShiftType shiftType, String note) {
 		// 檢查申請人使否已經排班
 		if (scheduleRepository.existsByWorkUserAndWorkDateAndShiftType(requester, date, shiftType)) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "已排班");
+			 throw new DuplicateScheduleException("已排班");
 		}
 		// 檢查是要換的班是否已滿
 		int count = scheduleRepository.countByWorkDateAndShiftType(date, shiftType);
 		if (count >= 2 && target == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "班表已滿");
+			throw new ScheduleFullException("班表已滿");
 		}
 
-		Schedule requesterSchedule = scheduleRepository.findByWorkUserAndWorkDate(target, date);
+		Schedule requesterSchedule = scheduleRepository.findByWorkUserAndWorkDate(requester, date);
 
 		ShiftSwapRequest request = new ShiftSwapRequest();
 		request.setRequestUser(requester);
 		request.setTargetUser(target);
 		request.setSwapDate(date);
-		request.setSwapFromShift(requesterSchedule != null ? requesterSchedule.getShiftType() : null);
+        request.setSwapToShift(shiftType);
+        request.setSwapFromShift(requesterSchedule != null ? requesterSchedule.getShiftType() : null);
 		request.setSwapMessage(note);
 		request.setReqStatus(RequestStatus.PENDING);
 
@@ -70,10 +75,10 @@ public class ShiftSwapRequestServiceImpl implements ShiftSwapRequestService {
 	@Transactional
 	public void approveSwap(Integer requestId, String message) {
 		ShiftSwapRequest request = shiftSwapRequestRepository.findById(requestId.longValue())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "找不到換班請求"));
+				.orElseThrow(() -> new SwapRequestNotFoundException("找不到換班請求"));
 
 		if (request.getReqStatus() != RequestStatus.PENDING) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "請求狀態已更新");
+			throw new SwapRequestStateException("請求狀態已更新");
 		}
 
 		request.setReqStatus(RequestStatus.APPROVED);
@@ -91,10 +96,10 @@ public class ShiftSwapRequestServiceImpl implements ShiftSwapRequestService {
 
 		// 同意後移除現有排班
 		if (from != null) {
-			scheduleRepository.deleteByWorkUserAndWorkDateAndShiftType(requester, date, shiftType);
+			scheduleRepository.deleteByWorkUserAndWorkDateAndShiftType(requester, date, from);
 		}
 		if (target != null && to != null) {
-			scheduleRepository.deleteByWorkUserAndWorkDateAndShiftType(target, date, shiftType);
+			scheduleRepository.deleteByWorkUserAndWorkDateAndShiftType(target, date, to);
 		}
 
 		// 加上新的排班
@@ -125,9 +130,9 @@ public class ShiftSwapRequestServiceImpl implements ShiftSwapRequestService {
 	@Override
 	public void rejectSwap(Integer requestId, String message) {
 		ShiftSwapRequest request = shiftSwapRequestRepository.findById(requestId.longValue())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "找不到換班請求"));
+				.orElseThrow(() -> new SwapRequestNotFoundException("找不到換班請求"));
 		if (request.getReqStatus() != RequestStatus.PENDING) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "請求狀態已更新");
+			throw new SwapRequestStateException("請求狀態已更新");
 		}
 		request.setReqStatus(RequestStatus.REJECTED);
 		// 傳送拒絕訊息
@@ -144,7 +149,7 @@ public class ShiftSwapRequestServiceImpl implements ShiftSwapRequestService {
 	@Override
 	public void cancelSwap(Integer requestId) {
 		ShiftSwapRequest request = shiftSwapRequestRepository.findById(requestId.longValue())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "找不到換班請求"));
+				.orElseThrow(() -> new SwapRequestNotFoundException("找不到換班請求"));
 		request.setReqStatus(RequestStatus.CANCELLED);
 		shiftSwapRequestRepository.save(request);
 	}

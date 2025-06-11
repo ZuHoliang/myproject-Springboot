@@ -34,7 +34,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 	Schedule findByWorkUserAndWorkDate(User user, LocalDate workDate);
 	
 	// 查詢員工本月排班數量
-	@Query("SELECT COUNT(s) FROM Schedule s WHERE s.workUser = :user AND MONTH(s.workDate) = :mounth AND YEAR(s.workDate) = :year")
+	@Query("SELECT COUNT(s) FROM Schedule s WHERE s.workUser = :user AND MONTH(s.workDate) = :month AND YEAR(s.workDate) = :year")
 	int contByUserAndMonth(@Param("user") User user, @Param("month") int month, @Param("year") int year);	
 	
 	// 查詢單個員工當月的排班
@@ -44,5 +44,9 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 	// 查詢員工當月剩餘排班
 	@Query("SELECT s FROM Schedule s WHERE s.workUser = :user AND s.workDate BETWEEN :from AND :to")
 	List<Schedule> findUpcomingSchedules(@Param("user") User user, @Param("from") LocalDate from, @Param("to") LocalDate to);
+	
+	// 查詢指定月份全部排班
+    @Query("SELECT s FROM Schedule s WHERE MONTH(s.workDate) = :month AND YEAR(s.workDate) = :year")
+    List<Schedule> findByMonth(@Param("year") int year, @Param("month") int month);
 	
 }

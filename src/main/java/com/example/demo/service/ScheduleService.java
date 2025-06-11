@@ -30,6 +30,9 @@ public interface ScheduleService {
 	//查詢整月全部排班
 	List<Schedule> getSchedulesByDateAndShift(LocalDate date, ShiftType shiftType);
 	
+	//查詢指定月份全部排班(所有員工)
+    List<Schedule> getMonthSchedules(int year, int month);
+	
 //	//查詢所有排班(暫時不用)
 //	List<Schedule> getSchedulesByUser(User user);
 }

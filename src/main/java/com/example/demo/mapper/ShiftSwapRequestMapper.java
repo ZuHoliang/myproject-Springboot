@@ -28,10 +28,10 @@ public class ShiftSwapRequestMapper {
 			dto.setRequestUsername(request.getRequestUser().getUsername());
 		}
 		
-		if(request.getRequestUser() != null) {
-			dto.setTargetUserId(request.getTargetUser().getUserId());
-			dto.setTargetUsername(request.getTargetUser().getUsername());
-		}
+		if(request.getTargetUser() != null) {
+            dto.setTargetUserId(request.getTargetUser().getUserId());
+            dto.setTargetUsername(request.getTargetUser().getUsername());
+    }
 		
 		dto.setSwapFromShift(request.getSwapFromShift() != null ? request.getSwapFromShift().name() : null);
 		dto.setSwapToShift(request.getSwapToShift() != null ? request.getSwapToShift().name() : null);
