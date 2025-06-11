@@ -1,0 +1,469 @@
+班表
+每天有早班/晚班，每班最多2人(可以0人)
+每個User可以自己選擇要排的班，可以進行換班
+可以使用者可以查詢自己當月所有排班數量(顯示包括查詢當日到當月月底的排班)
+使用者查詢自己這個月剩餘的排班(只顯示包括查詢當日到當月月底的排班)
+查詢某月所有排班(用於顯示在每月班表上，班表上顯示username，用userId查詢)
+
+換班
+換班由User之間決定(將發送換班請求通知，可以原先沒有排班)
+若選擇的班別沒人:進行排班
+若選擇的班別有人但沒超過最大人數:可對已排班的user申請換班，也可直接排班
+若選的班別已達最大人數:只可以對已排班的user申請換班(可指定想換班的user)
+
+通知
+使用者能查詢這個收到的所有換班請求(用於製作通知)
+如果收到換班請求將會顯示在'個人資訊'頁面，換班申請人也可留言備註換班原由(可為空)
+會顯示換班的申請人、想進行換班的日期、甚麼時候申請的
+也會顯示自己申請換班的請求、向誰申請換班、想換班的班別、申請的日期，也能取消自己的換班申請
+收到通知的user可以進行同意或拒絕，同意後換班才會完成
+
+
+<!--Entity-->
+/**User**/
+package com.example.demo.model.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity // (建立資料表)
+@Table(name = "users") // 資料表命名
+public class User {
+
+	@Id // 主鍵、員工編號
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "user_id")
+	private Integer userId;
+	
+	//帳號
+	@Column(name = "account_id", unique = true, nullable = false)
+	private String accountId;
+	//使用者姓名
+	@Column(name = "username", unique = false, nullable = false)
+	private String username;
+	//密碼
+	@Column(name = "password_hash", unique = false, nullable = false)
+	private String passwordHash;
+
+	@Column(name = "salt", unique = false, nullable = false)
+	private String salt;
+
+	@Column(name = "role")
+	private Integer role;
+
+	@Column(name = "active")
+	private Boolean active;
+
+//	@Column(name = "email", nullable = true)
+//	private String email;
+
+}
+
+/**Schedule**/
+package com.example.demo.model.entity;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.example.demo.model.enums.ShiftType;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@Entity
+@Table(name = "schedule")
+public class Schedule {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "schedule_id")
+	private Long scheduleId;
+	
+	@ManyToOne
+	@JoinColumn(name = "user_id", nullable = true)
+	private User workUser;
+	
+	private LocalDate workDate;
+	
+	@Enumerated(EnumType.STRING)
+	private ShiftType shiftType;
+	
+	@CreationTimestamp
+	private LocalDateTime createTime;
+	
+	@UpdateTimestamp
+	private LocalDateTime updateTime;	
+	
+
+}
+
+/**ShiftSwapRequest**/
+package com.example.demo.model.entity;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.example.demo.model.enums.RequestStatus;
+import com.example.demo.model.enums.ShiftType;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@Entity
+@Table(name = "shift_swap_request")
+public class ShiftSwapRequest {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "shift_swap_id")
+	private Long shiftSwapId;
+	
+	//換班申請人
+	@ManyToOne
+	@JoinColumn(name = "requester_id")
+	private User requestUser;
+	
+	//換班被申請人
+	@ManyToOne
+	@JoinColumn(name = "target_id", nullable = true)
+	private User targetUser;
+	
+	//要換班的日期
+	private LocalDate swapDate;
+	
+	//要換班的班別
+	@Enumerated(EnumType.STRING)
+	@Column(name = "swap_to_shift", nullable = true)
+	private ShiftType swapToShift;
+	
+	//原本的班別(可以原先並未排班)
+	@Enumerated(EnumType.STRING)
+	@Column(name = "swap_from_shift", nullable = true)
+	private ShiftType swapFromShift;
+	
+	//可備註換班事由
+	@Column(name = "swap_message", nullable = true)
+	private String swapMessage;
+	//回應訊息
+	@Column(name = "resp_message", nullable = true)
+	private String respMessage;
+	
+	//請求狀態
+	@Enumerated(EnumType.STRING)
+	private RequestStatus reqStatus;
+	
+	//申請時間
+	@CreationTimestamp
+	private LocalDateTime requestTime;
+	
+	//回應時間
+	@UpdateTimestamp
+	private LocalDateTime responseTime;	
+
+}
+<!--Enum-->
+/**ShiftType**/
+package com.example.demo.model.enums;
+
+public enum ShiftType {	
+	MORNING,
+	EVENING,
+
+}
+
+/**RequestStatus**/
+package com.example.demo.model.enums;
+
+public enum RequestStatus {
+	PENDING, 
+	APPROVED, 
+	REJECTED, 
+	CANCELLED,
+}
+
+
+<!--DTO-->
+/**UserDto**/
+package com.example.demo.model.dto;
+
+import lombok.Data;
+import lombok.ToString;
+
+@Data
+@ToString
+public class UserDto {
+	private Integer userId;
+	private String accountId;
+	private String username;
+	private Integer role;
+	private Boolean active;
+//	private String email;
+
+}
+
+
+/**ScheduleDto**/
+package com.example.demo.model.dto;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class ScheduleDto {
+	private Integer scheduleId;
+	private Integer userId;
+	private String username;
+	private String shiftType;
+	private LocalDate workDate;
+	private LocalDateTime createTime;
+	private LocalDateTime updateTime;
+
+}
+
+/**ShiftSwapRequestDto**/
+package com.example.demo.model.dto;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class ShiftSwapRequestDto {
+	private Integer shiftSwapId;
+	
+	private Integer requestUserId;
+	private String requestUsername;
+	
+	private Integer targetUserId;
+	private String targetUsername;
+	
+	private String swapFromShift;
+	private String swapToShift;
+	
+	private String swapMessage;
+	private String respMessage;
+	
+	private String reqStatus;
+	
+	private LocalDate swapDate;
+	
+	private LocalDateTime requestTime;
+	private LocalDateTime responseTime;
+	
+}
+
+
+<!--Mapper-->
+
+/**ScheduleMapper**/
+package com.example.demo.mapper;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.example.demo.model.dto.ScheduleDto;
+import com.example.demo.model.entity.Schedule;
+import com.example.demo.model.entity.User;
+import com.example.demo.repository.UserRepository;
+
+@Component
+public class ScheduleMapper {
+
+	@Autowired
+	private ModelMapper modelMapper;
+	
+	@Autowired
+	private UserRepository userRepository;
+
+	//Entity轉DTO
+	public ScheduleDto toDto(Schedule schedule) {
+		ScheduleDto dto = modelMapper.map(schedule, ScheduleDto.class);
+		if (schedule.getWorkUser() != null) {
+			dto.setUserId(schedule.getWorkUser().getUserId());
+			dto.setUsername(schedule.getWorkUser().getUsername());
+		}
+		dto.setShiftType(schedule.getShiftType().name());
+		return dto;
+	
+	}
+	
+	//DTO轉Entity
+	public Schedule toEntity(ScheduleDto dto) {
+		Schedule entity = modelMapper.map(dto, Schedule.class);
+		if(dto.getUserId() != null) {
+			User user = userRepository.findById(dto.getUserId()).orElse(null);
+			entity.setWorkUser(user);
+		}
+		return entity;
+	}
+	
+}
+
+
+/**ShiftSwapRequestMapper**/
+package com.example.demo.mapper;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.example.demo.model.dto.ShiftSwapRequestDto;
+import com.example.demo.model.entity.ShiftSwapRequest;
+import com.example.demo.model.entity.User;
+import com.example.demo.repository.UserRepository;
+
+@Component
+public class ShiftSwapRequestMapper {
+	
+	@Autowired
+	private ModelMapper modelMapper;
+	
+	@Autowired
+	private UserRepository userRepository;
+	
+	
+	//Entity轉DTO
+	public ShiftSwapRequestDto toDto(ShiftSwapRequest request) {
+		ShiftSwapRequestDto dto = modelMapper.map(request, ShiftSwapRequestDto.class);
+		
+		if(request.getRequestUser() != null) {
+			dto.setRequestUserId(request.getRequestUser().getUserId());
+			dto.setRequestUsername(request.getRequestUser().getUsername());
+		}
+		
+		if(request.getRequestUser() != null) {
+			dto.setTargetUserId(request.getTargetUser().getUserId());
+			dto.setTargetUsername(request.getTargetUser().getUsername());
+		}
+		
+		dto.setSwapFromShift(request.getSwapFromShift() != null ? request.getSwapFromShift().name() : null);
+		dto.setSwapToShift(request.getSwapToShift() != null ? request.getSwapToShift().name() : null);
+		dto.setReqStatus(request.getReqStatus().name());
+		
+		return dto;
+	}	
+	
+	//DTO轉Entity
+	public ShiftSwapRequest toEntity(ShiftSwapRequestDto dto) {
+		ShiftSwapRequest entity = modelMapper.map(dto, ShiftSwapRequest.class);
+		
+		if(dto.getRequestUserId() != null) {
+			User requestUser = userRepository.findById(dto.getRequestUserId()).orElse(null);
+			entity.setRequestUser(requestUser);
+		}
+		
+		if(dto.getTargetUserId() != null) {
+			User targeetUser = userRepository.findById(dto.getTargetUserId()).orElse(null);
+		}
+		
+		return entity;
+	}
+	
+
+}
+
+<!--Service-->
+
+/**ScheduleSwapService**/
+package com.example.demo.service;
+
+import java.util.List;
+
+import com.example.demo.model.entity.Schedule;
+import com.example.demo.model.entity.ShiftSwapRequest;
+import com.example.demo.model.entity.User;
+import com.example.demo.model.enums.RequestStatus;
+
+public interface ScheduleSwapService {
+	
+	//查詢某月全部班表
+	List<Schedule> getMonthlySchedules(int year, int month);
+	
+	//查詢使用者當月排班數量
+	int getUserMonthScheduleCount(User user, int year, int mouth);
+
+	//查詢當月排班
+	List<Schedule> getUserThisMonthSchedules(User user, int year, int month);
+	
+	//查詢使用者本月剩下排班
+	List<Schedule> getUserRemainingSchedules(User user);
+	
+	//已接收的換班請求
+	List<ShiftSwapRequest> getReceivedSwapRequests(User user);
+	
+	//未處理的換班請求
+	List<ShiftSwapRequest> getPendingSwapRequests(User user);
+	
+	//每月換班請求(可能用不到?)
+	List<ShiftSwapRequest> getMonthlySwapRequests(int year, int month);
+	
+	//發送換班請求
+	ShiftSwapRequest createSwapRequest(ShiftSwapRequest request);
+	
+	//回覆換班請求
+	ShiftSwapRequest responSwapRequest(Long id, RequestStatus status, String respMessage);
+}

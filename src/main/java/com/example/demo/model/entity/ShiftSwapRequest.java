@@ -60,7 +60,7 @@ public class ShiftSwapRequest {
 	@Column(name = "swap_from_shift", nullable = true)
 	private ShiftType swapFromShift;
 	
-	//可備註換班原由
+	//可備註換班事由
 	@Column(name = "swap_message", nullable = true)
 	private String swapMessage;
 	//回應訊息
