@@ -1,9 +1,12 @@
 package com.example.demo.service.impl;
 
+import org.springframework.stereotype.Service;
+
 import com.example.demo.model.entity.ShiftSwapRequest;
 import com.example.demo.model.entity.User;
 import com.example.demo.service.NotificationService;
 
+@Service
 public class NotificationServiceImpl implements NotificationService {
 
 	public void sendSwapRequestNotification(User targetUser, ShiftSwapRequest request) {
