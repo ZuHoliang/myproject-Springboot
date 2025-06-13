@@ -97,6 +97,7 @@ public class ScheduleRestController {
 	}
 	
 	//取得本月班表
+	@GetMapping("/{year}/{month}")
 	public ResponseEntity<ApiResponse<List<ScheduleDto>>> getMonthSchedules(@PathVariable int year, @PathVariable int month){
 		List<Schedule> schedules = scheduleService.getMonthSchedules(year, month);
 		List<ScheduleDto> dtos = schedules.stream().map(scheduleMapper::toDto).collect(Collectors.toList());
