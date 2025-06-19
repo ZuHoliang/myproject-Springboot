@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.demo.config.AIModerationConfig;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.model.dto.UserDto;
 import com.example.demo.model.entity.User;
@@ -27,6 +28,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private AIModerationService aiModerationService;
+	
+	@Autowired
+	private AIModerationConfig moderationConfig;
 
 	// 找不到使用者
 	private User findUser(String accountId) {
@@ -56,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
 	// 新增使用者
 	public UserDto addUser(String username, String password, Integer role, Boolean active) {
-		if(!aiModerationService.isAllowed(username)) {
+		if(moderationConfig.isUsernameCheck() && !aiModerationService.isAllowed(username)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "使用者名稱不當");
 		}
 		
@@ -88,7 +92,7 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "找不到使用者"));
 		if (username != null) {
-			if(!aiModerationService.isAllowed(username)) {
+			if(moderationConfig.isUsernameCheck() && !aiModerationService.isAllowed(username)) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "使用者名稱不當");
 			}
 			user.setUsername(username);

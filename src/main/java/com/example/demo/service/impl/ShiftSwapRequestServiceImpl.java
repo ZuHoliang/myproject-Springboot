@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.demo.config.AIModerationConfig;
 import com.example.demo.exception.DuplicateScheduleException;
 import com.example.demo.exception.ScheduleFullException;
 import com.example.demo.exception.SwapRequestNotFoundException;
@@ -39,11 +40,14 @@ public class ShiftSwapRequestServiceImpl implements ShiftSwapRequestService {
 	
 	@Autowired
 	private AIModerationService aiModerationService;
+	
+	@Autowired
+	private AIModerationConfig moderationConfig;
 
 	// 發送換班申請
 	@Override
 	public ShiftSwapRequest requestSwap(User requester, User target, LocalDate date, ShiftType shiftType, String note) {
-		if(note != null && !aiModerationService.isAllowed(note)) {
+		if(note != null && moderationConfig.isMessageCheck() && !aiModerationService.isAllowed(note)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"留言不當");
 		}
 		// 檢查申請人使否已經排班
@@ -89,7 +93,7 @@ public class ShiftSwapRequestServiceImpl implements ShiftSwapRequestService {
 
 		request.setReqStatus(RequestStatus.APPROVED);
 		if (message != null) {
-			if(!aiModerationService.isAllowed(message)) {
+			if(moderationConfig.isMessageCheck() && !aiModerationService.isAllowed(message)) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"留言不當");
 			}
 			request.setRespMessage(message);
@@ -147,7 +151,7 @@ public class ShiftSwapRequestServiceImpl implements ShiftSwapRequestService {
 		request.setReqStatus(RequestStatus.REJECTED);
 		// 傳送拒絕訊息
 		if (message != null) {
-			if(!aiModerationService.isAllowed(message)) {
+			if(moderationConfig.isMessageCheck() && !aiModerationService.isAllowed(message)) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"留言不當");
 			}
 			request.setRespMessage(message);
