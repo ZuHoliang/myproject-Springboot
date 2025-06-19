@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.zip.DataFormatException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +16,7 @@ import com.example.demo.model.dto.AnnouncementDto;
 import com.example.demo.model.dto.AnnouncementEditDto;
 import com.example.demo.model.entity.Announcement;
 import com.example.demo.repository.AnnouncementRepository;
+import com.example.demo.service.AIModerationService;
 import com.example.demo.service.AnnouncementService;
 
 @Service
@@ -31,7 +31,10 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
 
-	//取得最新公告(WebStocket)
+	@Autowired
+	private AIModerationService aiModerationService;
+
+	// 取得最新公告(WebStocket)
 	private void broadcastLatest() {
 		List<Announcement> latest = announcementRepository.findTop5ByAnnouncementActiveTrueOrderByCreatedTimeDesc();
 		List<AnnouncementDto> dtos = announcementMapper.toDtoList(latest);
@@ -48,10 +51,13 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 	// 發布公告
 	@Override
 	public AnnouncementDto createAnnouncement(AnnouncementEditDto dto, Integer authorId) {
+		if (!aiModerationService.isAllowed(dto.getTitle()) || !aiModerationService.isAllowed(dto.getContent())) {
+			throw new IllegalAccessError("公告內容不當");
+		}
 		Announcement entity = announcementMapper.toEntity(dto);
 		entity.setAuthorId(authorId);
 		Announcement saved = announcementRepository.save(entity);
-		AnnouncementDto dtoResult =announcementMapper.toDto(saved);
+		AnnouncementDto dtoResult = announcementMapper.toDto(saved);
 		broadcastLatest();
 		return dtoResult;
 	}
@@ -102,6 +108,9 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 	public AnnouncementDto updateAnnouncement(Long id, AnnouncementEditDto dto) {
 		Announcement existing = announcementRepository.findById(id)
 				.orElseThrow(() -> new AnnouncementNotFoundException("找不到要更新的公告:ID=" + id));
+		if (!aiModerationService.isAllowed(dto.getTitle()) || !aiModerationService.isAllowed(dto.getContent())) {
+			throw new IllegalArgumentException("公告內容不當");
+		}
 		existing.setTitle(dto.getTitle());
 		existing.setContent(dto.getContent());
 		if (dto.getAnnouncementActive() != null) {
