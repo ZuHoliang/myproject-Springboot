@@ -1,5 +1,9 @@
 package com.example.demo.config;
 
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
+
+@Component
 public class AIModerationConfig {
 	private boolean usernameCheck = false;
 	private boolean messageCheck = false;
