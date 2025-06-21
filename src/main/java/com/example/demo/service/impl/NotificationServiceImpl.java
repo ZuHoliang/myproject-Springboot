@@ -1,6 +1,8 @@
 package com.example.demo.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,6 +54,16 @@ public class NotificationServiceImpl implements NotificationService {
 		System.out.printf("[通知] 換班成功！%s ↔ %s，日期：%s\n", requester.getUsername(), target.getUsername(),
 				request.getSwapDate());
 	}
+	
+	@Override
+	public void sendSwapCancelNotification(User targetUser, ShiftSwapRequest request) {
+		Notification notification = new Notification();
+		notification.setRecipient(targetUser);
+		notification.setType(NotificationType.SWAP_CANCELLED);
+		notification.setText("已取消換班申請");
+		notificationRepository.save(notification);
+		messagingTemplate.convertAndSend("/topic/notifications/" + targetUser.getUserId(), notification);
+	}
 
 	@Override
 	public List<Notification> getNotifications(User user) {
@@ -67,4 +79,13 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 		notificationRepository.delete(n);
 	}
+	
+	@Override
+	public void sendNotificationCountDelta(User user, int delta) {
+		if (user == null) return;
+		Map<String, Integer> payload = new HashMap<>();
+		payload.put("delta", delta);
+		messagingTemplate.convertAndSend("/topic/notifications/" + user.getUserId(), payload);
+	}
+	
 }
